@@ -1,0 +1,21 @@
+{
+  "name": "web-crawl-for-p2p",
+  "version": "1.0.0",
+  "description": "A Simple project to crawl torrent site who don't support regex searching",
+  "main": "index.js",
+  "scripts": {
+    "start": "node ./index.js",
+    "debug": "node --inspect-brk=0.0.0.0:9229 ./index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "crawl"
+  ],
+  "author": "tiantc",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^0.21.1",
+    "jsdom": "^17.0.0",
+    "lodash": "^4.17.21"
+  }
+}

@@ -1,0 +1,9 @@
+conf/
+gulp_tasks/
+node_modules/
+src/assets/
+# ignore all js file
+/src/gedo.js
+/src/jup.js
+/src/shima.js
+/src/automation

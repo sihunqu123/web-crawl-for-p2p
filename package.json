@@ -4,9 +4,14 @@
   "description": "A Simple project to crawl torrent site who don't support regex searching",
   "main": "index.js",
   "scripts": {
+    "start-bt4g": "node ./src/automation/bt4gAuto.js",
     "start": "node ./index.js",
+    "start-firefox": "node ./src/automation/firefoxExample.js",
+    "start-chrome": "node ./src/automation/chromeExample.js",
     "debug": "node --inspect-brk=0.0.0.0:9229 ./index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "lint": "eslint .",
+    "fix": "eslint --fix .",
+    "test": "node test/dbTest"
   },
   "keywords": [
     "crawl"
@@ -16,6 +21,16 @@
   "dependencies": {
     "axios": "^0.21.1",
     "jsdom": "^17.0.0",
-    "lodash": "^4.17.21"
+    "lodash": "^4.17.21",
+    "mysql": "^2.18.1",
+    "node-fetch": "^2.6.7",
+    "node-ffprobe": "^3.0.0",
+    "rfr": "^1.2.3",
+    "selenium-webdriver": "^4.5.0"
+  },
+  "devDependencies": {
+    "eslint": "^8.24.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-plugin-import": "^2.26.0"
   }
 }

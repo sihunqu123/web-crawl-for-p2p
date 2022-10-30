@@ -1,0 +1,13 @@
+const ffprobe = require('node-ffprobe')
+// const ffprobeInstaller = require('@ffprobe-installer/ffprobe')
+
+// console.log(ffprobeInstaller.path, ffprobeInstaller.version)
+
+// ffprobe.FFPROBE_PATH = ffprobeInstaller.path
+ffprobe.FFPROBE_PATH = '/c/sbin/ffprobe.exe';
+
+var track = '/e/Downloads/快乐天堂滚石30演唱会Happy.Paradise.Rock.Records.30th.Anniversary.Live.In.Taipei.2010.mkv' // or video
+//
+ffprobe(track).then(probeData => {
+ console.log(probeData)
+});

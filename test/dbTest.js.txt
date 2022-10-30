@@ -1,0 +1,39 @@
+/* eslint-disable no-unused-vars  */
+const rfr = require('rfr');
+
+const { insertOne } = rfr('/src/util/dbUtil');
+
+
+
+/* eslint-enable no-unused-vars  */
+
+
+const runTest = async () => {
+
+//const sql = ` INSERT INTO 't_torrent' ( 'torrentName', 'torrentHref', 'torrentType', 'torrentTypeInt', 'torrentFileCnt', 'torrentSize', 'torrentSizeInMB', 'torrentCreateTime', 'torrentSeeders', 'torrentLeechers', 'website', 'pageIndex') VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) `;
+//const args = [
+//  'torrentName',
+//  'torrentHref',
+//  'torrentType',
+//  0,
+//  13,
+//  '13.5GB',
+//  115,
+//  '2022-01-05',
+//  5,
+//  10,
+//  'bt4g',
+//  1,
+//];
+
+
+  const sql = 'INSERT INTO aaa SET ?';
+  const args = [{
+    fileName: 'abc',
+  }, {}];
+  const res = await insertOne(sql, args);
+  console.info(res);
+}
+
+
+runTest();

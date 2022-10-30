@@ -1,49 +1,38 @@
-const { JSDOM } = require('jsdom')
-const axios = require('axios')
+/* eslint-disable no-unused-vars  */
+const { JSDOM } = require('jsdom');
+const axios = require('axios');
 
-const gedo = require('./src/gedo')
-const jup = require('./src/jup')
-const shima = require('./src/shima')
+const dbUtil = require('./src/util/dbUtil');
+const dbAction = require('./src/db/dbAction');
 
+const gedo = require('./src/gedo');
+const jup = require('./src/jup');
+const shima = require('./src/shima');
+const scrawlToFile = require('./src/scrawlToFile');
+
+/* eslint-enable no-unused-vars  */
+
+/* the JSDOM useage demo
 const { document } = new JSDOM(
-    '<h2 class="title">Hello world</h2>'
-).window
-const heading = document.querySelector('.title')
-heading.textContent = 'Hello there!'
-heading.classList.add('welcome')
+  '<h2 class="title">Hello world</h2>',
+).window;
+const heading = document.querySelector('.title');
+heading.textContent = 'Hello there!';
+heading.classList.add('welcome');
+*/
 
 // console.info(heading.innerHTML);
 
+// shima.scrawlGEDO();
 
-const start = 0;
-const end = 1;
-const result = {};
+const init = async () => dbUtil.init();
 
-const doSleep = async (timeInMS) => {
-  return new Promise(resolve => {
-    setTimeout(() => {resolve()}, timeInMS);
-  });  
-}
+const main = async () => {
+  await init();
 
-const doDOMURL = async (url, res) => {
+  // await uncen.doScrawl();
+  await dbAction.insertTorrentFrmFile('result/taboo-vr/result.json');
+};
 
-//async function getForum() {
-//  try {
-//    const response = await axios.get(
-//      'https://www.reddit.com/r/programming.json'
-//    )
-//    console.log(response)
-//  } catch (error) {
-//    console.error(error)
-//  }
-//}
-
-  return JSDOM.fromURL(url).then(dom => {
-    console.log(dom.serialize());
-  }).catch(err => {
-    console.error(`failed to load url: ${url}`);
-  });
-}
-
-
-shima.scrawlGEDO();
+main();
+// magnet:?xt=urn:btih:

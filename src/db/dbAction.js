@@ -57,9 +57,9 @@ const insert1Torrent = async (pageIndex, torrent) => {
     files,
   } = torrent;
   const queryRes = await dbUtil.poolQuery(SELECT_TORRECT_BY_HREF, [torrentHref]);
-  console.info(`queryRes: ${JSON.stringify(queryRes)}`);
+  // console.info(`queryRes: ${JSON.stringify(queryRes)}`);
   if (queryRes.length !== 0) {
-    console.info(`record for href: ${torrentHref}, already exists, won't insert this time: ${queryRes}`);
+    console.info(`record for href: ${torrentHref}, already exists, won't insert this time: ${JSON.stringify(queryRes)}`);
     return false;
   }
 
@@ -131,7 +131,7 @@ const insertTorrent1Page = async (pageIndex, pageResult) => {
     const torrent = torrents[i];
     const isSucceed = await insert1Torrent(pageIndex, torrent);
     if (isSucceed) {
-      addedHrefThisTime.push(torrent.torrentHref);
+      addedHrefThisTime.push(`magnet:?xt=urn:btih:${torrent.torrentHref}`);
     }
   }
   return addedHrefThisTime;
@@ -146,13 +146,23 @@ const insertTorrentFrmFile = async (file) => {
   const srcJson = JSON.parse(srcTxt);
   let addHrefThisTime = [];
 
-  /** eslint-disable guard-for-in */
-  for (const pageIndex in srcJson) {
+  const pageIndexes = Object.keys(srcJson);
+  const { length } = pageIndexes;
+
+  for (let i = 0; i < length; i++) {
+    const pageIndex = pageIndexes[i];
     const pageResult = srcJson[pageIndex];
     const added = await insertTorrent1Page(pageIndex, pageResult);
     addHrefThisTime = addHrefThisTime.concat(added);
   }
-  /** eslint-enable guard-for-in */
+
+  /** eslint-disable guard-for-in */
+  // for (const pageIndex in srcJson) {
+  //  const pageResult = srcJson[pageIndex];
+  //  const added = await insertTorrent1Page(pageIndex, pageResult);
+  //  addHrefThisTime = addHrefThisTime.concat(added);
+  // }
+  /// ** eslint-enable guard-for-in */
 
   console.info(`insert done. addHrefThisTime:\n${addHrefThisTime.join('\n')}`);
 

@@ -93,6 +93,9 @@ const extractTorrentList = (htmlStr) => {
       case 'OTHER':
         torrentTypeInt = 5;
         break;
+      case 'DOC':
+        torrentTypeInt = 6;
+        break;
       default:
         torrentTypeInt = 5;
         console.warn(`no torrentType matched - torrentType: ${torrentType}`);

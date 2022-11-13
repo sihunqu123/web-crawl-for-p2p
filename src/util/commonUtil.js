@@ -1,6 +1,8 @@
 const rfr = require('rfr');
 
 const fetch = require('node-fetch');
+const HttpsProxyAgent = require('https-proxy-agent');
+const proxyAgent = new HttpsProxyAgent('http://192.168.10.251:10889');
 const crypto = require('crypto');
 
 const { cookie, maxRetrytimes } = rfr('/src/config/config.js');
@@ -10,6 +12,14 @@ const sleepMS = (timeInMS) => new Promise((resolve) => {
     resolve();
   }, timeInMS);
 });
+
+
+function randomIntFromInterval(min, max) { // min and max included 
+  return Math.floor(Math.random() * (max - min + 1) + min);
+}
+
+// randomIntFromInterval(1, 6)
+
 
 const fetchBT4G = async (url) => {
   console.info(`fetch url: ${url}`);
@@ -27,12 +37,31 @@ const fetchBT4G = async (url) => {
       'sec-fetch-site': 'none',
       'sec-fetch-user': '?1',
       'upgrade-insecure-requests': '1',
-      'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/106.0.0.0 Safari/537.36',
+      'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Safari/537.36',
     },
+    agent: proxyAgent,
   });
-  if (response.status !== 200) { console.error(response.text()); throw Error(`fetch failed: url: ${url}, statusCode: ${response.status}`); }
-  const body = await response.text();
-  return body;
+
+  if (response.status === 404) {
+    // const errorMsg = await response.text();
+    const errorMsg = `fetch url failed - statusCode: 404, url: ${url}`;
+    console.debug(errorMsg);
+    return {
+      statusCode: response.status,
+      body: errorMsg,
+    };
+  }
+  if (response.status === 200) {
+    const body = await response.text();
+    return {
+      statusCode: response.status,
+      body,
+    };
+  }
+
+  const errorMsg = await response.text();
+  console.debug(`fetch url failed: ${url}, errorMsg: ${errorMsg}`);
+  throw Error(`fetch failed: url: ${url}, statusCode: ${response.status}`);
 };
 
 const fetchBT4GRetry = async (url) => {
@@ -44,6 +73,7 @@ const fetchBT4GRetry = async (url) => {
       return retVal;
     } catch (e) {
       error = e;
+      await sleepMS(randomIntFromInterval(1000, 5000));
     }
   }
   throw error;

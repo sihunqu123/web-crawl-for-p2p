@@ -51,6 +51,8 @@ module.exports = {
     'no-unused-vars': 1,
     'arrow-body-style': 1,
     'space-before-function-paren': 1,
+    'arrow-parens': 1,
+    'prefer-destructuring': 1,
 
   },
 };

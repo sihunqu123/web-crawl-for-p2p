@@ -52,13 +52,10 @@ const query = async (connection, sql = '', substitution = []) => new Promise(((r
   });
 }));
 
-const insert = async (connection, tableName, map) => {
-  const keys = [];
-  const values = [];
-  for (const key in map) {
-    keys.push(key);
-    values.push(map[key]);
-  }
+const insert = async (connection, tableName, keyValMap) => {
+  const keys = Object.keys(keyValMap);
+  const values = keys.map((key) => keyValMap[key]);
+
   const sql = formInsertSql(tableName, keys);
   return new Promise(((resolve, reject) => {
     connection.query(sql, values, (error, results, fields) => {

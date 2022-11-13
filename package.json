@@ -19,7 +19,10 @@
   "author": "tiantc",
   "license": "MIT",
   "dependencies": {
+    "async": "^3.2.4",
     "axios": "^0.21.1",
+    "http-proxy-agent": "^5.0.0",
+    "https-proxy-agent": "^5.0.1",
     "jsdom": "^17.0.0",
     "lodash": "^4.17.21",
     "mysql": "^2.18.1",

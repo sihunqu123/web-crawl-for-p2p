@@ -15,7 +15,7 @@ const {
 /* eslint-enable no-unused-vars  */
 
 const {
-  extractTorrentList, extractFiles, fetchBT4GRetry, sleepMS,
+  extractTorrentList, extractFiles, fetchBT4GRetry, sleepMS, fetchTorrentDetails,
 } = rfr('/src/util/index.js');
 
 const SUCCEED = 'succeed';
@@ -112,22 +112,6 @@ const do1Index = async (searchTxt, sortColumn, pageIndex, result) => {
       return result;
     }
   }
-
-  async function fetchTorrentDetails(torrent) {
-    // let htmlStr = null;
-    // htmlStr = await fetchBT4GRetry(torrent.torrentDetailLink);
-    const { body: htmlStr, statusCode } = await fetchBT4GRetry(torrent.torrentDetailLink);
-    if(statusCode === 404) { // some fileDetails might have been removed.
-      torrent.files = torrent.filesPartial;
-      console.warn(`The detail page of ${torrent.torrentName} has been removed`);
-      // return callback(null, torrent);
-      return torrent;
-    }
-    const files = extractFiles(htmlStr);
-    torrent.files = files;
-    // return callback(null, torrent);
-    return torrent;
-  };
 
   try {
     // TODO: use concurrent util to avoid Promise.all()

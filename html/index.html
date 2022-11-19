@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>MY APP</title>
+</head>
+<body>
+
+
+<form action="/uploadAFile" enctype="multipart/form-data" method="POST">
+  <span>update single file</span></br>
+  <span>param1:</span>
+   <input type="input" name="param1" />
+   <input type="file" name="myfile" />
+   <input type="submit" value="Upload a file"/>
+</form>
+
+</br>
+</br>
+</br>
+</br>
+<!-- MULTIPLE FILES -->
+
+<form action="/uploadFiles"  enctype="multipart/form-data" method="POST">
+  <span>update multiple file</span>
+  <input type="file" name="myfiles" multiple>
+  <input type="text" name="pathToSave">
+  <input type="submit" value="Upload your files"/>
+</form>
+
+</br>
+</br>
+</br>
+</br>
+</br>
+  <!--   PHOTO-->
+
+<form action="/upload/photo" enctype="multipart/form-data" method="POST">
+  <span>update single image</span>
+  <input type="file" name="myImage" accept="image/*" />
+  <input type="submit" value="Upload Photo"/>
+</form>
+
+</br>
+</br>
+</br>
+</br>
+</br>
+
+
+</body>
+</html>

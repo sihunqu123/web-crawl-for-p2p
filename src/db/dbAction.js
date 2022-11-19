@@ -40,9 +40,10 @@ const SELECT_TORRECT_BY_HREF = `
   select * from t_torrent where torrentHref = ?
 `.replaceAll('\n', '');
 
-const website = 'bt4g';
+// TODO: read as parameter
+// const website = 'bt4g';
 
-const insert1Torrent = async (pageIndex, torrent) => {
+const insert1Torrent = async (pageIndex, torrent, website = 'bt4g') => {
   const {
     torrentName,
     torrentHref,
@@ -120,22 +121,29 @@ const insert1Torrent = async (pageIndex, torrent) => {
   }
 };
 
-const insertTorrent1Page = async (pageIndex, pageResult) => {
-  const { status, torrents } = pageResult;
-  if (status !== 'succeed') {
-    throw new Error(`page ${pageIndex} failed! Won't process`);
-  }
+const insertTorrent1PageForce = async (pageIndex, torrents, website = 'bt4g') => {
   const addedHrefThisTime = [];
   const { length } = torrents;
   for (let i = 0; i < length; i++) {
     const torrent = torrents[i];
-    const isSucceed = await insert1Torrent(pageIndex, torrent);
+    const isSucceed = await insert1Torrent(pageIndex, torrent, website);
     if (isSucceed) {
       addedHrefThisTime.push(`magnet:?xt=urn:btih:${torrent.torrentHref}`);
     }
   }
   return addedHrefThisTime;
 };
+
+const insertTorrent1Page = async (pageIndex, pageResult, website = 'bt4g') => {
+  const { status, torrents } = pageResult;
+  if (status !== 'succeed') {
+    throw new Error(`page ${pageIndex} failed! Won't process`);
+  }
+  return insertTorrent1PageForce(pageIndex, torrents, website);
+};
+
+
+
 
 const insertTorrentFrmFile = async (file) => {
   const srcTxt = await fs.readFileSync(file, {
@@ -170,4 +178,5 @@ const insertTorrentFrmFile = async (file) => {
 
 module.exports = {
   insertTorrentFrmFile,
+  insertTorrent1PageForce,
 };

@@ -14,7 +14,7 @@ const port = 8180;
 const app = express();
 
 // app.use(bodyParser.urlencoded({ extended: true }));
-app.use(express.json({limit: '50mb'}));
+app.use(express.json({ limit: '200mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
 // ROUTES WILL GO HERE
@@ -47,14 +47,16 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
-app.post('/add-bt4g', async (req, res, next) => {
+app.post('/add-torrent', async (req, res, next) => {
   // console.info(`req.body: ${JSON.stringify(req.body)}`);
   const { website, torrents } = req.body;
   const pageIndex = 1;
+  // console.info(`torrents: ${JSON.stringify(torrents)}`);
   try {
     const added = await dbAction.insertTorrent1PageForce(pageIndex, Object.values(torrents), website);
     const retVal = added.join('\n');
     res.status(200);
+    console.info(`request done`);
   //const retVal = [
   //  'line1',
   //  'line2',

@@ -13,7 +13,10 @@ const htmlStrToDocument = (str) => {
 
 // Common variable begin
 const stringToMB = (str) => {
-  const num = Number.parseFloat(`${str.match(/^\d+\.?\d+/g)}`, 10);
+  if(str === '0' || str === '0.0') {
+    return 0;
+  }
+  const num = Number.parseFloat(`${str.match(/^\d+\.?\d*/g)}`, 10);
   const unit = (`${str.match(/[a-z]+$/gi)}`).toUpperCase();
   let retVal = 0;
 
@@ -30,6 +33,7 @@ const stringToMB = (str) => {
     case 'KB':
       retVal = num / 1024;
       break;
+    case 'NULL': // unit is omitted when it's byte
     case 'B':
       retVal = num / (1024 * 1024);
       break;
@@ -40,7 +44,7 @@ const stringToMB = (str) => {
   return retVal;
 };
 
-const innerText = (ele) => ele.innerText || ele.textContent;
+const innerText = (ele) => (ele.innerText || ele.textContent).trim();
 
 const extractFileInfo = (liDom) => {
   const fileName = liDom.childNodes[0].textContent.replaceAll('\n', '').trim();
@@ -130,16 +134,18 @@ const extractTorrentList = (htmlStr) => {
   return resultTorrents;
 };
 
-const extractFiles = (htmlStr) => {
+const extractExtraTorrentInfo = (htmlStr) => {
   const document_ = htmlStrToDocument(htmlStr);
 
   const fileLIs = Array.from(document_.querySelectorAll('main > .container > .row:nth-of-type(2) > .col.s12 > table:nth-of-type(5) li'));
   const files = fileLIs.map((fileItem) => extractFileInfo(fileItem));
   // console.info(JSON.stringify(files, null, 2));
-  return files;
+  return {
+    files,
+  };
 };
 
 module.exports = {
   extractTorrentList,
-  extractFiles,
+  extractExtraTorrentInfo,
 };

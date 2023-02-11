@@ -4,6 +4,7 @@ CREATE TABLE `t_torrent` (
   `id` VARCHAR(32) NOT NULL COMMENT 'Primary Key',
   `torrentName` varchar(512) DEFAULT NULL COMMENT 'torrent title',
   `torrentHref` varchar(512) DEFAULT NULL COMMENT 'the magnet link for download. Need to add prefix: magnet:?xt=urn:btih:',
+  `torrentHrefFull` varchar(2048) DEFAULT NULL COMMENT 'the full magnet link including the contents after &',
   `torrentType` varchar(32) DEFAULT NULL COMMENT 'torrent type. Video, zip, pic etc.',
   `torrentTypeInt` int DEFAULT NULL COMMENT 'video: 0; audio: 1; archiveFile: 2; application: 3; other: 5, DOC: 6',
   `torrentFileCnt` int DEFAULT NULL COMMENT 'the number files contianed in this torrent',

@@ -1,7 +1,7 @@
 const rfr = require('rfr');
 
 const fetchBT4GRetry = require('./commonUtil');
-const extractFiles = require('./domUtil');
+const extractExtraTorrentInfo = require('./domUtil');
 
 
 const fetchTorrentDetails = async (torrent) => {
@@ -25,7 +25,7 @@ const fetchTorrentDetails = async (torrent) => {
     throw new Error(`failed to fetch fileList for torrent: ${torrent.torrentName}`);
   } // else 200
   
-  const files = extractFiles(htmlStr);
+  const files = extractExtraTorrentInfo(htmlStr);
   torrent.files = files;
   // return callback(null, torrent);
   return torrent;

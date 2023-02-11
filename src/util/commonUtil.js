@@ -58,11 +58,11 @@ const fetchBT4GRetry = async (url, timesToRetry = 3) => {
           await sleepMS(randomIntFromInterval(1000, 5000));
           // TODO: how to refresh in nodejs?
           // await refershToken(url);
-          return fetch(url, timesToRetry);
+          return fetchBT4GRetry(url, timesToRetry);
         }
         console.warn(`unexpected statusCode: ${res.status} when accessing: ${url}`);
         await sleepMS(randomIntFromInterval(1000, 5000));
-        return fetch(url, timesToRetry);
+        return fetchBT4GRetry(url, timesToRetry);
       }
 
       body = `Retry exceed for url: ${url} with statusCode: ${statusCode}`; 

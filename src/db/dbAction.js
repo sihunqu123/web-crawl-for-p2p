@@ -5,6 +5,11 @@ const _ = require('lodash');
 const dbUtil = rfr('/src/util/dbUtil.js');
 const { generateNaoid } = rfr('/src/util/commonUtil.js');
 
+const testSuffix = '';
+// const testSuffix = '';
+const torrentTalbeName = `t_torrent${testSuffix}`;
+const torrentFilesTalbeName = `t_torrent_files${testSuffix}`;
+
 // const INSERT_TORRENT = `
 // INSERT INTO t_torrent (
 //   torrentName,
@@ -37,16 +42,18 @@ const { generateNaoid } = rfr('/src/util/commonUtil.js');
 // `.replaceAll('\n', '');
 
 const SELECT_TORRECT_BY_HREF = `
-  select * from t_torrent where torrentHref = ?
+  select * from ${torrentTalbeName} where torrentHref = ?
 `.replaceAll('\n', '');
 
 // TODO: read as parameter
 // const website = 'bt4g';
+const hasDownloaded = 0;
 
 const insert1Torrent = async (pageIndex, torrent, website = 'bt4g') => {
   const {
     torrentName,
     torrentHref,
+    torrentHrefFull,
     torrentType,
     torrentTypeInt,
     torrentFileCnt,
@@ -60,7 +67,7 @@ const insert1Torrent = async (pageIndex, torrent, website = 'bt4g') => {
   const queryRes = await dbUtil.poolQuery(SELECT_TORRECT_BY_HREF, [torrentHref]);
   // console.info(`queryRes: ${JSON.stringify(queryRes)}`);
   if (queryRes.length !== 0) {
-    console.info(`record for href: ${torrentHref}, already exists, won't insert this time: ${JSON.stringify(queryRes)}`);
+    console.info(`/////// record for href: ${torrentHref}, already exists, won't insert this time: ${JSON.stringify(queryRes)}`);
     return false;
   }
 
@@ -68,10 +75,11 @@ const insert1Torrent = async (pageIndex, torrent, website = 'bt4g') => {
   try {
     await dbUtil.beginTransaction(conn);
     const insertId = generateNaoid();
-    const insertRes = await dbUtil.insert(conn, 't_torrent', {
+    const insertRes = await dbUtil.insert(conn, torrentTalbeName, {
       id: insertId,
       torrentName,
       torrentHref,
+      torrentHrefFull: torrentHrefFull || torrentHref,
       torrentType,
       torrentTypeInt,
       torrentFileCnt: Number.parseInt(torrentFileCnt, 10),
@@ -82,6 +90,7 @@ const insert1Torrent = async (pageIndex, torrent, website = 'bt4g') => {
       torrentLeechers: Number.parseInt(torrentLeechers, 10),
       website,
       pageIndex,
+      hasDownloaded,
     });
 
     // insertRes: 1, 1, 0
@@ -101,7 +110,7 @@ const insert1Torrent = async (pageIndex, torrent, website = 'bt4g') => {
         fileSizeInMB,
       } = file;
 
-      const insertFilesRes = await dbUtil.insert(conn, 't_torrent_files', {
+      const insertFilesRes = await dbUtil.insert(conn, torrentFilesTalbeName, {
         id: generateNaoid(),
         fileName,
         extension,

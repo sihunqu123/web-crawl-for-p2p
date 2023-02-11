@@ -53,6 +53,7 @@ module.exports = {
     'space-before-function-paren': 1,
     'arrow-parens': 1,
     'prefer-destructuring': 1,
+    'object-curly-spacing': 1,
 
   },
 };

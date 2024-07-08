@@ -15,6 +15,7 @@ CREATE TABLE `t_torrent` (
   `torrentLeechers` int DEFAULT NULL COMMENT 'leechers count',
   `website` varchar(32) DEFAULT NULL COMMENT 'the source torrent site',
   `added_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT 'The time added into mysql DB',
+  `last_modified_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT 'The last modified time',
   `pageIndex` int DEFAULT NULL COMMENT 'Which page this torrent was found',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COMMENT='store torrents';

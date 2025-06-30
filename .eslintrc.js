@@ -15,6 +15,7 @@ module.exports = {
     camelcase: 'off',
     //  "no-unused-vars": "off",
     'no-console': 'off',
+    'no-undef': 'error',
     'padded-blocks': 'off',
     'no-multiple-empty-lines': 1,
     'no-await-in-loop': 'off',

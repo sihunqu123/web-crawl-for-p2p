@@ -14,8 +14,7 @@ const sleepMS = (timeInMS) => new Promise((resolve) => {
   }, timeInMS);
 });
 
-
-function randomIntFromInterval(min, max) { // min and max included 
+function randomIntFromInterval(min, max) { // min and max included
   return Math.floor(Math.random() * (max - min + 1) + min);
 }
 
@@ -45,16 +44,16 @@ const fetchBT4GRetry = async (url, timesToRetry = 3) => {
       agent: proxyAgent,
     });
     const statusCode = res.status;
-    if(statusCode === 200) {
+    if (statusCode === 200) {
       body = await res.text();
-    } else if(statusCode === 404) {
+    } else if (statusCode === 404) {
       body = `fetch url failed - statusCode: 404, url: ${url}`;
       console.debug(body);
     } else {
       --timesToRetry;
-      if(timesToRetry >= 0) {
-        if(statusCode === 401 || statusCode === 403) { // refresh page
-          console.warn(`session expired, try to refresh token with iframe`);
+      if (timesToRetry >= 0) {
+        if (statusCode === 401 || statusCode === 403) { // refresh page
+          console.warn('session expired, try to refresh token with iframe');
           await sleepMS(randomIntFromInterval(1000, 5000));
           // TODO: how to refresh in nodejs?
           // await refershToken(url);
@@ -65,7 +64,7 @@ const fetchBT4GRetry = async (url, timesToRetry = 3) => {
         return fetchBT4GRetry(url, timesToRetry);
       }
 
-      body = `Retry exceed for url: ${url} with statusCode: ${statusCode}`; 
+      body = `Retry exceed for url: ${url} with statusCode: ${statusCode}`;
       console.error(body);
     }
 
@@ -73,7 +72,7 @@ const fetchBT4GRetry = async (url, timesToRetry = 3) => {
       statusCode,
       body,
     };
-  } catch(e) {
+  } catch (e) {
     console.info(e);
     throw e;
   }

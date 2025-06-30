@@ -7,7 +7,6 @@ const multer = require('multer');
 const dbUtil = require('./src/util/dbUtil');
 const dbAction = require('./src/db/dbAction');
 
-
 const port = 8180;
 
 // CREATE EXPRESS APP
@@ -22,7 +21,6 @@ app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 //   res.json({ message: 'WELCOME' });
 // });
 
-
 // ROUTES
 app.get('/', (req, res) => {
   res.sendFile(`${__dirname}/html/index.html`);
@@ -32,12 +30,11 @@ const saveFolder = path.join(__dirname, 'upload');
 console.info(saveFolder);
 app.use('/static', express.static(saveFolder));
 
-
 // SET STORAGE
 const storage = multer.diskStorage({
   destination(req, file, cb) {
     // will be saved to the `${root directory of project}/uploads` folder
-//    cb(null, 'uploads');
+    //    cb(null, 'uploads');
     cb(null, saveFolder);
   },
   filename(req, file, cb) {
@@ -56,14 +53,14 @@ app.post('/add-torrent', async (req, res, next) => {
     const added = await dbAction.insertTorrent1PageForce(pageIndex, Object.values(torrents), website);
     const retVal = added.join('\n');
     res.status(200);
-    console.info(`request done`);
-  //const retVal = [
-  //  'line1',
-  //  'line2',
-  //  'line3',
-  //].join('\n');
+    console.info('request done');
+    // const retVal = [
+    //  'line1',
+    //  'line2',
+    //  'line3',
+    // ].join('\n');
     return res.send(retVal);
-  } catch(e) {
+  } catch (e) {
     res.status(500);
     console.error(e);
     return res.send(e);
@@ -75,7 +72,7 @@ app.post('/uploadAFile', upload.single('myfile'), (req, res, next) => {
   // app.post('/uploadfile', upload.single('file'), (req, res, next) => {
   console.info(`req.body: ${JSON.stringify(req.body)}`);
   console.info(`req.file: ${req.file}`);
-  const file = req.file;
+  const { file } = req;
   if (!file) {
     const error = new Error('Please upload a file');
     error.httpStatusCode = 400;
@@ -97,7 +94,7 @@ app.post('/uploadFiles', upload.array('content', 12), (req, res, next) => {
   //  req.files['gallery'] -> Array
   //
   // req.body will contain the text fields, if there were any
-  const files = req.files;
+  const { files } = req;
   console.info(`req.files: ${files} END`);
   console.info(`req.body: ${JSON.stringify(req.body)} END`);
   if (!files) {
@@ -121,5 +118,3 @@ dbUtil.init().then(() => {
 });
 
 // https://code.tutsplus.com/tutorials/file-upload-with-multer-in-node--cms-32088
-
-

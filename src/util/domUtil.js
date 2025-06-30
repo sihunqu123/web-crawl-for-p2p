@@ -1,11 +1,11 @@
 const { JSDOM } = require('jsdom');
 
 const htmlStrToDocument = (str) => {
-    const dom = new JSDOM(str);
-    const { window: window_ } = dom;
-    const { document: document_ } = window_;
+  const dom = new JSDOM(str);
+  const { window: window_ } = dom;
+  const { document: document_ } = window_;
 
-    return document_;
+  return document_;
 };
 
 // const dom = new JSDOM(`<!DOCTYPE html><p>Hello world</p>`);
@@ -13,7 +13,7 @@ const htmlStrToDocument = (str) => {
 
 // Common variable begin
 const stringToMB = (str) => {
-  if(str === '0' || str === '0.0') {
+  if (str === '0' || str === '0.0') {
     return 0;
   }
   const num = Number.parseFloat(`${str.match(/^\d+\.?\d*/g)}`, 10);

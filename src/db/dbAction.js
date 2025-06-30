@@ -151,9 +151,6 @@ const insertTorrent1Page = async (pageIndex, pageResult, website = 'bt4g') => {
   return insertTorrent1PageForce(pageIndex, torrents, website);
 };
 
-
-
-
 const insertTorrentFrmFile = async (file) => {
   const srcTxt = await fs.readFileSync(file, {
     encoding: 'utf8',

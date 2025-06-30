@@ -42,7 +42,7 @@ const main = async () => {
     const resultJSONFile = await scrawlToFile.doScrawl();
     await dbAction.insertTorrentFrmFile(`${resultJSONFile}`);
     // await dbAction.insertTorrentFrmFile(`result/Uncensored-Leaked_byseeders/result.json`);
-  } catch(e) {
+  } catch (e) {
     console.error('Error: in main try catch');
     console.error(e);
   }

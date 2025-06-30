@@ -39,10 +39,11 @@
     "node-fetch": "^2.6.7",
     "node-ffprobe": "^3.0.0",
     "rfr": "^1.2.3",
-    "selenium-webdriver": "^4.5.0"
+    "selenium-webdriver": "^4.5.0",
+    "web-crawl-for-p2p": "file:"
   },
   "devDependencies": {
-    "eslint": "^8.24.0",
+    "eslint": "^8.57.1",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-plugin-import": "^2.26.0"
   }

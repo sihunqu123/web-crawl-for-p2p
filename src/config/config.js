@@ -25,7 +25,7 @@ const dbConfig = {
   queueLimit: 20,
   supportBigNumbers: true,
   bigNumberStrings: true,
-//charsetNumber: 'utf8_general_ci',
+  // charsetNumber: 'utf8_general_ci',
   charsetNumber: 'utf8mb4_unicode_ci',
   charset: 'utf8mb4',
   collation: 'utf8mb4_unicode_ci',

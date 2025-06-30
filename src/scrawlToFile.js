@@ -116,29 +116,29 @@ const do1Index = async (searchTxt, sortColumn, pageIndex, result) => {
   try {
     // TODO: use concurrent util to avoid Promise.all()
     const torrentFilled = result.torrents.filter(({ files }) => !files);
-    let asyncResults = await async.mapLimit(torrentFilled, RESTConcurrency, fetchTorrentDetails);
+    const asyncResults = await async.mapLimit(torrentFilled, RESTConcurrency, fetchTorrentDetails);
     // console.log(asyncResults);
 
     // results is now an array of the file size in bytes for each file, e.g.
     // [ 1000, 2000, 3000]
 
-//  const promises = result.torrents.filter(({ files }) => !files).map(async (torrent) => {
-//    let htmlStr = null;
-//    try {
-//      htmlStr = await fetchBT4GRetry(torrent.torrentDetailLink);
-//    } catch(e) {
-//      if(e.message.indexOf('statusCode: 404') > 0) { // some fileDetails might have been removed.
-//        torrent.files = torrent.filesPartial;
-//        console.warn(`The detail page of ${torrent.torrentName} has been removed`);
-//        return torrent;
-//      }
-//      throw e;
-//    }
-//    const files = extractFiles(htmlStr);
-//    torrent.files = files;
-//    return torrent;
-//  });
-//  await Promise.all(promises);
+    //  const promises = result.torrents.filter(({ files }) => !files).map(async (torrent) => {
+    //    let htmlStr = null;
+    //    try {
+    //      htmlStr = await fetchBT4GRetry(torrent.torrentDetailLink);
+    //    } catch(e) {
+    //      if(e.message.indexOf('statusCode: 404') > 0) { // some fileDetails might have been removed.
+    //        torrent.files = torrent.filesPartial;
+    //        console.warn(`The detail page of ${torrent.torrentName} has been removed`);
+    //        return torrent;
+    //      }
+    //      throw e;
+    //    }
+    //    const files = extractFiles(htmlStr);
+    //    torrent.files = files;
+    //    return torrent;
+    //  });
+    //  await Promise.all(promises);
   } catch (e) {
     console.warn(`failed to fetch files for pageIndex: ${pageIndex}`);
     console.error(e);
@@ -177,7 +177,7 @@ const doScrawl = async () => {
   // console.info(`result: ${JSON.stringify(result)}`);
   console.info('done');
   await writeResult(result);
-  if(!isAllSucceed) {
+  if (!isAllSucceed) {
     throw new Error('Run into error, will exit...');
   }
   return RESULT_FILE;

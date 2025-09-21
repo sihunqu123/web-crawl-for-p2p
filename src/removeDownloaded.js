@@ -36,9 +36,9 @@ function containsChinese(str) {
 
 
 async function main() {
-    const inputFilePath = 'T:\\p\\left_old.txt'; // 输入文件的路径
-    const doneFilePath = 'T:\\p\\fileList2.txt'; // 输入文件的路径
-    const outputFilePath = 'T:\\p\\left.txt'; // 输出文件的路径
+    const inputFilePath = 'T:\\book\\20252206\\20250705_left.txt'; // 输入文件的路径
+    const doneFilePath = 'T:\\book\\20252206\\20250705_done.txt'; // 输入文件的路径
+    const outputFilePath = 'T:\\book\\20252206\\20250706_left.txt'; // 输出文件的路径
 //  const inputFilePath = '/t/p/all_8k_uniq_encoded.txt'; // 输入文件的路径
 //  const doneFilePath = '/t/book/fileList.txt'; // 输入文件的路径
 //  const outputFilePath = '/t/p/left.txt'; // 输出文件的路径

@@ -6,6 +6,7 @@ const multer = require('multer');
 
 const dbUtil = require('./src/util/dbUtil');
 const dbAction = require('./src/db/dbAction');
+const cors = require('cors');
 
 const port = 8180;
 
@@ -15,6 +16,23 @@ const app = express();
 // app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.json({ limit: '200mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
+
+// enable CORS for local frontend calls
+app.use(cors());
+
+// Explicit CORS headers middleware (in case preflight or proxies strip headers)
+app.use((req, res, next) => {
+  // Allow from any origin for development. Change to specific origin(s) in production.
+  res.header('Access-Control-Allow-Origin', req.headers.origin || '*');
+  res.header('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+  res.header('Access-Control-Allow-Credentials', 'true');
+  // Handle preflight
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(204);
+  }
+  return next();
+});
 
 // ROUTES WILL GO HERE
 // app.get('/', (req, res) => {
@@ -111,6 +129,44 @@ app.post('/uploadFiles', upload.array('content', 12), (req, res, next) => {
   };
 
   return res.send(response);
+});
+
+// API: get paginated torrents
+// query params: page (1-based), pageSize
+app.get('/api/torrents', async (req, res) => {
+  const page = Math.max(1, parseInt(req.query.page, 10) || 1);
+  const pageSize = Math.max(1, parseInt(req.query.pageSize, 10) || 50);
+  const offset = (page - 1) * pageSize;
+  try {
+    const totalRes = await dbUtil.poolQuery('SELECT COUNT(*) as cnt FROM t_torrent');
+    const total = totalRes && totalRes[0] ? totalRes[0].cnt : 0;
+    const rows = await dbUtil.poolQuery(
+      'SELECT * FROM t_torrent ORDER BY added_time DESC LIMIT ? OFFSET ?',
+      [pageSize, offset]
+    );
+    return res.json({ page, pageSize, total, rows });
+  } catch (e) {
+    console.error(e);
+    return res.status(500).json({ error: e.message || e });
+  }
+});
+
+// API: get single torrent and its files
+app.get('/api/torrents/:id', async (req, res) => {
+  const { id } = req.params;
+  try {
+    const torrents = await dbUtil.poolQuery('SELECT * FROM t_torrent WHERE id = ?', [id]);
+    if (!torrents || torrents.length === 0) {
+      return res.status(404).json({ error: 'not found' });
+    }
+    const torrent = torrents[0];
+    const files = await dbUtil.poolQuery('SELECT * FROM t_torrent_files WHERE torrentId = ?', [id]);
+    torrent.files = files;
+    return res.json(torrent);
+  } catch (e) {
+    console.error(e);
+    return res.status(500).json({ error: e.message || e });
+  }
 });
 
 dbUtil.init().then(() => {

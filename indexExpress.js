@@ -137,14 +137,136 @@ app.get('/api/torrents', async (req, res) => {
   const page = Math.max(1, parseInt(req.query.page, 10) || 1);
   const pageSize = Math.max(1, parseInt(req.query.pageSize, 10) || 50);
   const offset = (page - 1) * pageSize;
+
+  // field-level filters (optional)
+  const torrentName = req.query.torrentName ? String(req.query.torrentName).trim() : '';
+  const website = req.query.website ? String(req.query.website).trim() : '';
+  const torrentType = req.query.torrentType ? String(req.query.torrentType).trim() : '';
+  const hasDownloaded = req.query.hasDownloaded !== undefined && req.query.hasDownloaded !== '' ? req.query.hasDownloaded : '';
+
+  // date range filters (expecting ISO-like strings, frontend should format as 'YYYY-MM-DD HH:mm:ss')
+  const beginAdded = req.query.beginAdded ? String(req.query.beginAdded).trim() : '';
+  const endAdded = req.query.endAdded ? String(req.query.endAdded).trim() : '';
+  const beginCreated = req.query.beginCreated ? String(req.query.beginCreated).trim() : '';
+  const endCreated = req.query.endCreated ? String(req.query.endCreated).trim() : '';
+
+  const sortField = req.query.sortField ? String(req.query.sortField).trim() : 'added_time';
+  const sortDir = req.query.sortDir === 'asc' ? 'ASC' : 'DESC';
+
+  // allow-list for sortable fields to prevent SQL injection
+  const allowedSortFields = new Set([
+    'added_time', 'torrentName', 'torrentSizeInMB', 'torrentSeeders', 'torrentLeechers', 'torrentCreateTime'
+  ]);
+  const orderBy = allowedSortFields.has(sortField) ? `${sortField} ${sortDir}` : `added_time DESC`;
+
   try {
-    const totalRes = await dbUtil.poolQuery('SELECT COUNT(*) as cnt FROM t_torrent');
-    const total = totalRes && totalRes[0] ? totalRes[0].cnt : 0;
-    const rows = await dbUtil.poolQuery(
-      'SELECT * FROM t_torrent ORDER BY added_time DESC LIMIT ? OFFSET ?',
-      [pageSize, offset]
-    );
-    return res.json({ page, pageSize, total, rows });
+    const whereClauses = [];
+    const params = [];
+
+    // Define known columns and their types for safe handling
+    const columns = {
+      id: 'number',
+      torrentName: 'string',
+      torrentHref: 'string',
+      torrentHrefFull: 'string',
+      torrentType: 'string',
+      torrentTypeInt: 'number',
+      torrentFileCnt: 'number',
+      torrentSize: 'string',
+      torrentSizeInMB: 'number',
+      torrentCreateTime: 'date',
+      torrentSeeders: 'number',
+      torrentLeechers: 'number',
+      website: 'string',
+      added_time: 'date',
+      pageIndex: 'number',
+      hasDownloaded: 'number',
+      last_modified_time: 'date'
+    };
+
+    // Helper to push a date range when params provided as field_begin/field_end (snake) or legacy params
+    function pushDateRange(fieldName, legacyBegin, legacyEnd) {
+      const beginSnake = req.query[`${fieldName}_begin`] ? String(req.query[`${fieldName}_begin`]).trim() : '';
+      const endSnake = req.query[`${fieldName}_end`] ? String(req.query[`${fieldName}_end`]).trim() : '';
+      const beginLegacy = legacyBegin ? String(req.query[legacyBegin] || '').trim() : '';
+      const endLegacy = legacyEnd ? String(req.query[legacyEnd] || '').trim() : '';
+
+      const begin = beginSnake || beginLegacy;
+      const end = endSnake || endLegacy;
+      if (begin) {
+        whereClauses.push(`${fieldName} >= ?`);
+        params.push(begin);
+      }
+      if (end) {
+        whereClauses.push(`${fieldName} <= ?`);
+        params.push(end);
+      }
+    }
+
+    // Iterate known columns and check for query params with the same name
+    for (const [col, type] of Object.entries(columns)) {
+      const raw = req.query[col];
+      if (raw !== undefined && raw !== null && String(raw).trim() !== '') {
+        const v = String(raw).trim();
+        if (type === 'string') {
+          whereClauses.push(`${col} LIKE ?`);
+          params.push(`%${v}%`);
+        } else if (type === 'number') {
+          if (col === 'id' && v.indexOf(',') >= 0) {
+            // support comma-separated id list
+            const ids = v.split(',').map((s) => Number(s.trim())).filter((n) => !Number.isNaN(n));
+            if (ids.length > 0) {
+              const placeholders = ids.map(() => '?').join(',');
+              whereClauses.push(`${col} IN (${placeholders})`);
+              params.push(...ids);
+            }
+          } else {
+            const n = Number(v);
+            if (!Number.isNaN(n)) {
+              whereClauses.push(`${col} = ?`);
+              params.push(n);
+            }
+          }
+        } else if (type === 'date') {
+          // allow direct equality or range via *_begin/*_end handled below
+          whereClauses.push(`${col} = ?`);
+          params.push(v);
+        }
+      }
+      // For date columns also support begin/end query params
+      if (type === 'date') {
+        // map legacy names to maintain backward compatibility
+        if (col === 'added_time') {
+          pushDateRange(col, 'beginAdded', 'endAdded');
+        } else if (col === 'torrentCreateTime') {
+          pushDateRange(col, 'beginCreated', 'endCreated');
+        } else if (col === 'last_modified_time') {
+          pushDateRange(col, 'beginLastModified', 'endLastModified');
+        } else {
+          pushDateRange(col, null, null);
+        }
+      }
+    }
+
+    const whereSql = whereClauses.length > 0 ? `WHERE ${whereClauses.join(' AND ')}` : '';
+
+    let total = 0;
+    let rows = [];
+
+    if (whereSql) {
+      const totalRes = await dbUtil.poolQuery(`SELECT COUNT(*) as cnt FROM t_torrent ${whereSql}`, params);
+      total = totalRes && totalRes[0] ? totalRes[0].cnt : 0;
+      // add LIMIT/OFFSET params
+      const selectParams = params.slice();
+      selectParams.push(pageSize, offset);
+      rows = await dbUtil.poolQuery(`SELECT * FROM t_torrent ${whereSql} ORDER BY ${orderBy} LIMIT ? OFFSET ?`, selectParams);
+    } else {
+      const totalRes = await dbUtil.poolQuery('SELECT COUNT(*) as cnt FROM t_torrent');
+      total = totalRes && totalRes[0] ? totalRes[0].cnt : 0;
+      rows = await dbUtil.poolQuery(`SELECT * FROM t_torrent ORDER BY ${orderBy} LIMIT ? OFFSET ?`, [pageSize, offset]);
+    }
+
+    return res.json({ page, pageSize, total, rows, sortField, sortDir });
   } catch (e) {
     console.error(e);
     return res.status(500).json({ error: e.message || e });
@@ -163,6 +285,30 @@ app.get('/api/torrents/:id', async (req, res) => {
     const files = await dbUtil.poolQuery('SELECT * FROM t_torrent_files WHERE torrentId = ?', [id]);
     torrent.files = files;
     return res.json(torrent);
+  } catch (e) {
+    console.error(e);
+    return res.status(500).json({ error: e.message || e });
+  }
+});
+
+// API: bulk update hasDownloaded for multiple torrent ids
+// POST body: { ids: [1,2,3], value: 0|1 }
+app.post('/api/torrents/mark-downloaded', async (req, res) => {
+  const { ids, value } = req.body || {};
+  if (!Array.isArray(ids) || ids.length === 0) {
+    return res.status(400).json({ error: 'ids must be a non-empty array' });
+  }
+  const v = Number(value) === 1 ? 1 : 0;
+  const numericIds = ids.map((i) => Number(i)).filter((n) => !Number.isNaN(n));
+  if (numericIds.length === 0) {
+    return res.status(400).json({ error: 'ids must contain numeric values' });
+  }
+  try {
+    const placeholders = numericIds.map(() => '?').join(',');
+    const sql = `UPDATE t_torrent SET hasDownloaded = ? WHERE id IN (${placeholders})`;
+    const params = [v, ...numericIds];
+    const result = await dbUtil.poolQuery(sql, params);
+    return res.json({ affectedRows: result && result.affectedRows ? result.affectedRows : 0 });
   } catch (e) {
     console.error(e);
     return res.status(500).json({ error: e.message || e });

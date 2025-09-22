@@ -299,14 +299,15 @@ app.post('/api/torrents/mark-downloaded', async (req, res) => {
     return res.status(400).json({ error: 'ids must be a non-empty array' });
   }
   const v = Number(value) === 1 ? 1 : 0;
-  const numericIds = ids.map((i) => Number(i)).filter((n) => !Number.isNaN(n));
-  if (numericIds.length === 0) {
-    return res.status(400).json({ error: 'ids must contain numeric values' });
+  // IDs in this schema are varchar(32). Keep them as strings.
+  const stringIds = ids.map((i) => String(i)).filter((s) => s && s.length > 0);
+  if (stringIds.length === 0) {
+    return res.status(400).json({ error: 'ids must contain non-empty string values' });
   }
   try {
-    const placeholders = numericIds.map(() => '?').join(',');
+    const placeholders = stringIds.map(() => '?').join(',');
     const sql = `UPDATE t_torrent SET hasDownloaded = ? WHERE id IN (${placeholders})`;
-    const params = [v, ...numericIds];
+    const params = [v, ...stringIds];
     const result = await dbUtil.poolQuery(sql, params);
     return res.json({ affectedRows: result && result.affectedRows ? result.affectedRows : 0 });
   } catch (e) {

@@ -4,14 +4,14 @@
   "description": "A Simple project to crawl torrent site who don't support regex searching",
   "main": "index.js",
   "scripts": {
-    "start": "node ./indexExpress.js",
+    "start": "cross-env DEBUG_SQL=1 node ./indexExpress.js",
     "start-bak": "node ./bin/www",
     "start-auto": "node ./src/automation/bt4gAuto.js",
     "start-bt4g": "node ./index.js",
     "start-firefox": "node ./src/automation/firefoxExample.js",
     "start-chrome": "node ./src/automation/chromeExample.js",
     "debug": "node --inspect-brk=0.0.0.0:9229 ./index.js",
-  "start-debug": "cross-env DEBUG_SQL=1 node ./indexExpress.js",
+    "start-debug": "cross-env DEBUG_SQL=1 node ./indexExpress.js",
     "lint": "eslint .",
     "fix": "eslint --fix .",
     "test": "node test/dbTest"

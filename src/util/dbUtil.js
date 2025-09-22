@@ -12,7 +12,12 @@ const mysql = require('mysql');
 let connPool;
 
 const init = async () => {
-  connPool = mysql.createPool(dbConfig);
+  // Ensure DATETIME/TIMESTAMP columns are returned as strings to avoid
+  // automatic conversion to JS Date objects (which then serialize to UTC
+  // and can shift the displayed value). This preserves the DB's stored
+  // representation like 'YYYY-MM-DD HH:mm:ss'.
+  const poolConfig = Object.assign({}, dbConfig, { dateStrings: true });
+  connPool = mysql.createPool(poolConfig);
 };
 
 const formInsertSql = (tableName, columns) => {
@@ -34,7 +39,39 @@ const formInsertSql = (tableName, columns) => {
 };
 
 const poolQuery = async (sql = '', substitution = []) => new Promise((resolve, reject) => {
+  // Optional debug logging: when DEBUG_SQL env var is truthy, log the query,
+  // parameter substitution and execution time. Keep this non-throwing and
+  // avoid leaking large binary blobs.
+  const debug = !!process.env.DEBUG_SQL;
+  const start = debug ? Date.now() : null;
+  if (debug) {
+    try {
+      // Safely stringify substitutions (avoid circular and huge objects)
+      const safeSub = substitution && substitution.length ? substitution.map((s) => {
+        try {
+          if (typeof s === 'string' && s.length > 2000) return `${s.slice(0, 2000)}...[truncated]`;
+          if (s && typeof s === 'object') return JSON.stringify(s);
+          return String(s);
+        } catch (e) {
+          return '[unstringifiable]';
+        }
+      }) : [];
+      console.info(`[dbUtil] SQL -> ${sql}`);
+      if (safeSub.length) console.info(`[dbUtil] Params -> ${safeSub.join(', ')}`);
+    } catch (e) {
+      // swallow logging errors
+    }
+  }
+
   connPool.query(sql, substitution, (error, results) => {
+    if (debug && start !== null) {
+      try {
+        const dur = Date.now() - start;
+        console.info(`[dbUtil] Query completed in ${dur}ms`);
+      } catch (e) {
+        // ignore
+      }
+    }
     if (error) {
       return reject(error);
     }

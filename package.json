@@ -11,6 +11,7 @@
     "start-firefox": "node ./src/automation/firefoxExample.js",
     "start-chrome": "node ./src/automation/chromeExample.js",
     "debug": "node --inspect-brk=0.0.0.0:9229 ./index.js",
+  "start-debug": "cross-env DEBUG_SQL=1 node ./indexExpress.js",
     "lint": "eslint .",
     "fix": "eslint --fix .",
     "test": "node test/dbTest"
@@ -47,6 +48,7 @@
   "devDependencies": {
     "eslint": "^8.57.1",
     "eslint-config-airbnb-base": "^15.0.0",
-    "eslint-plugin-import": "^2.26.0"
+    "eslint-plugin-import": "^2.26.0",
+    "cross-env": "^7.0.3"
   }
 }
